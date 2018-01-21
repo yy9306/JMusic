@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "name": "推荐",
+      "linkUrl": "Recommend"
+    },
+    {
+      "name": "歌手",
+      "linkUrl": "Singer"
+    },
+    {
+      "name": "排行",
+      "linkUrl": "Rank"
+    },
+    {
+      "name": "搜索",
+      "linkUrl": "Search"
+    }
+  ]
+}
