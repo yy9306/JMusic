@@ -95,9 +95,12 @@ def enableProguardInReleaseBuilds = false
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
+        // Add these lines below the existing config
+        renderscriptTargetApi 23
+        renderscriptSupportModeEnabled true
         applicationId "com.jm"
         minSdkVersion 16
         targetSdkVersion 22
@@ -137,6 +140,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-blur-image')
     compile project(':react-native-splash-screen')
     compile project(':react-native-linear-gradient')
     compile fileTree(dir: "libs", include: ["*.jar"])

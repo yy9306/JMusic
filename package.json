@@ -9,6 +9,7 @@
   "dependencies": {
     "react": "16.0.0",
     "react-native": "0.51.0",
+    "react-native-blur-image": "^1.0.6",
     "react-native-largelist": "^1.2.4",
     "react-native-linear-gradient": "^2.3.0",
     "react-native-scrollable-tab-view": "^0.8.0",

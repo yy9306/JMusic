@@ -11,8 +11,8 @@ import {
   ScrollView
 } from 'react-native'
   
-import NavBarView from '../base/NavBarView'
-import Header from './header'
+
+import HttpMusic from '../api/api'
 import {jumpPager, width} from '../base/Utils'
 
 
@@ -27,11 +27,20 @@ export default class Rank extends Component{
       rankSource: []
     }
     this.bgColor = '#222'
-    this.rankData = require('../sources/json/rank.json')
+    this.HttpMusic = new HttpMusic()
+    this.requestData()
   }
-
-  componentWillMount() {
-    this.setState({rankSource: this.rankData.data.topList})
+  
+  requestData () {
+    this.HttpMusic.getRank()
+      .then((request) => {
+        if(request.code === 0) {
+          this.setState({rankSource: request.data.topList})
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   render() {
@@ -45,7 +54,11 @@ export default class Rank extends Component{
                       let reg = /(?=\:)/g
                       let imgUrl = item.picUrl.replace(reg, 's')
                       return (
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => {
+                          jumpPager(this.props.navigate, 'RankDetail', {
+                            id: item.id
+                          })
+                        }}>
                           <View style={styles.rankGroup}>
                             <Image source={{uri: imgUrl}} style={styles.img}/>
                             <View style={styles.textWrap}>

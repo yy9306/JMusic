@@ -11,8 +11,6 @@ import {
   ScrollView
 } from 'react-native'
 
-import Header from './header'
-import NavBarView from '../base/NavBarView'
 import HttpMusic from '../api/api'
 import Swiper from 'react-native-swiper'
 import {jumpPager, width} from '../base/Utils'

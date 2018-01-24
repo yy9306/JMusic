@@ -103,10 +103,6 @@ export default class SingerDetail extends Component{
           }]
         }} ref="list_wrapper">
           <AnimatedFlatList
-                   style={{
-                     // height: 800,
-                   }}
-                    // scrollEnabled = {false}
                     data={this.state.singerData}
                     keyExtractor={(item, index) => index}
                     showsVerticalScrollIndicator={false}
@@ -117,10 +113,14 @@ export default class SingerDetail extends Component{
                     )}
                     renderItem={({item}) => {
                       return (
-                        <View style={styles.listGroup}>
-                          <Text numberOfLines={1} style={styles.singer_name}>{item.name}</Text>
-                          <Text numberOfLines={1} style={styles.singer_album}>{item.singer}-{item.album}</Text>
-                        </View>
+                        <TouchableOpacity onPress={() => {
+                          jumpPager(this.props.navigation.navigate, 'PlayerScence', null)
+                        }}>
+                          <View style={styles.listGroup}>
+                            <Text numberOfLines={1} style={styles.singer_name}>{item.name}</Text>
+                            <Text numberOfLines={1} style={styles.singer_album}>{item.singer}-{item.album}</Text>
+                          </View>
+                        </TouchableOpacity>
                       )
                     }}/>
         </Animated.View>
@@ -132,7 +132,6 @@ export default class SingerDetail extends Component{
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: '#222222',
   },
   bigImag: {
     width: width,

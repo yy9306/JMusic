@@ -55,7 +55,7 @@ export default class Header extends Component{
                            renderTabBar={() => <DefaultTabBar />}>
           <Recommend tabLabel='推荐'/>
           <SingerL navigate={this.props.navigation.navigate} tabLabel='歌手'/>
-          <Rank tabLabel='排行'/>
+          <Rank navigate={this.props.navigation.navigate} tabLabel='排行'/>
           <Search tabLabel='搜索'/>
         </ScrollableTabView>
       </View>
