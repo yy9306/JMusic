@@ -47,7 +47,7 @@ export default class Rank extends Component{
     return (
       <View  style={styles.container}>
         <View style={styles.wrapper}>
-          <FlatList data={this.state.rankSource}
+          {this.state.rankSource.length > 0 && <FlatList data={this.state.rankSource}
                     keyExtractor={(item, index) => index}
                     showsVerticalScrollIndicator={false}
                     renderItem={({item, index}) => {
@@ -73,7 +73,7 @@ export default class Rank extends Component{
                           </View>
                         </TouchableOpacity>
                       )
-                    }}/>
+                    }}/>}
 
         </View>
 

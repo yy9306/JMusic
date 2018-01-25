@@ -35,7 +35,7 @@ export default class Singer extends Component{
     this.HttpMusic = new HttpMusic()
     this.listHeight = []
     this.getSinger()
-    this.singerList = require('../sources/json/singerList.json')
+    // this.singerList = require('../sources/json/singerList.json')
   }
 
   componentWillMount() {
@@ -54,7 +54,7 @@ export default class Singer extends Component{
     this.HttpMusic.getSingerDetail()
       .then((request) => {
         if(request.code === 0) {
-          this.setState({singerData: request.data.list})
+          this.setState({singerData: request.data.list}, )
         }
       })
       .catch((error) => {

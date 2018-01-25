@@ -23,13 +23,24 @@ export default class Recommend extends Component{
     super(props)
     this.state = {
       bannerData: {},
-      decList: {}
+      decList: []
     }
     this.bgColor = '#222'
     this.HttpMusic = new HttpMusic()
-    this.DesList = require('../sources/json/DecList.json')
     this.requestData()
+    this.requestDisc()
     this.bgColor = '#222222'
+  }
+  
+  requestDisc() {
+    this.HttpMusic.getDiscUrl()
+      .then((request) => {
+        if(request.code === 0) {
+          this.setState({decList: request.data.list})
+        }else {
+          console.log(error)
+        }
+      })
   }
   
   requestData() {
@@ -101,7 +112,7 @@ export default class Recommend extends Component{
           </View>
           <View style={styles.scrollLists} ref="scrollLists">
             {/*{this._renderItemView(this.DesList)}*/}
-            {this.DesList.data.list.map((item, index) => {
+            {this.state.decList.map((item, index) => {
               let reg = /(?=\:)/g
               let image = item.imgurl.replace(reg, 's')
               return (

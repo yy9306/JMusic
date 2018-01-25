@@ -46,7 +46,7 @@ export default class SingerL extends Component {
   }
   
   getSinger() {
-    this.HttpMusic.getSingerDetail()
+    this.HttpMusic.getSinger()
       .then((request) => {
         if(request.code === 0) {
           this.setState({singerData: request.data.list}, () => {
@@ -182,7 +182,8 @@ export default class SingerL extends Component {
         onPress={() => {
           jumpPager(this.props.navigate, 'SingerDetail', {
             title: singer.name,
-            avatar: singer.avatar
+            avatar: singer.avatar,
+            id: singer.id
           })
         }}
       >

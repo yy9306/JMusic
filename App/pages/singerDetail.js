@@ -12,6 +12,7 @@ import {
   Animated
 } from 'react-native'
 
+import HttpMusic from '../api/api'
 import {createSong} from '../common/song'
 import {width,height, jumpPager} from '../base/Utils'
 
@@ -29,15 +30,30 @@ export default class SingerDetail extends Component{
       scrollY: new Animated.Value(0),
       singerData: [],
     }
-  
+    this.HttpMusic = new HttpMusic()
     this.singerDetail = require('../sources/json/singerDetail.json')
     this.title = this.props.navigation.state.params.data.name
     this.avatar = this.props.navigation.state.params.data.avatar
+    this.mid = this.props.navigation.state.params.data.id
+    this.requestData(this.mid)
   }
   
-  componentWillMount() {
-    this._normalizeSongs(this.singerDetail.data.list)
+  requestData(mid) {
+    this.HttpMusic.getDetailSinger(mid)
+      .then((request) => {
+        if(request.code === 0) {
+          this._normalizeSongs(request.data.list)
+          // this.setState({bannerData: request.data})
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
+  
+  // componentWillMount() {
+  //   this._normalizeSongs(this.singerDetail.data.list)
+  // }
   
   _normalizeSongs (list) {
     let ret = []
@@ -102,7 +118,7 @@ export default class SingerDetail extends Component{
             })
           }]
         }} ref="list_wrapper">
-          <AnimatedFlatList
+          {this.state.singerData.length > 0 && <AnimatedFlatList
                     data={this.state.singerData}
                     keyExtractor={(item, index) => index}
                     showsVerticalScrollIndicator={false}
@@ -122,7 +138,7 @@ export default class SingerDetail extends Component{
                           </View>
                         </TouchableOpacity>
                       )
-                    }}/>
+                    }}/>}
         </Animated.View>
       </View>
     )
