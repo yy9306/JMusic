@@ -17,6 +17,7 @@
     "react-native-star-rating": "^1.0.8",
     "react-native-storage": "^0.2.2",
     "react-native-swiper": "^1.5.13",
+    "react-native-video": "^2.0.0",
     "react-navigation": "^1.0.0-beta.23",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",

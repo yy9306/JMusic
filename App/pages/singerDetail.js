@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 
 import HttpMusic from '../api/api'
-import {createSong} from '../common/song'
+import {createSong, isValidMusic} from '../common/song'
 import {width,height, jumpPager} from '../base/Utils'
 
 const windowHeight = width * 0.7;
@@ -59,7 +59,7 @@ export default class SingerDetail extends Component{
     let ret = []
     list.forEach((item) => {
       let {musicData} = item
-      if (musicData.songid && musicData.albummid) {
+      if (isValidMusic(musicData)) {
         ret.push(createSong(musicData))
       }
     })

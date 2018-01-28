@@ -55,16 +55,6 @@ export default class Recommend extends Component{
       })
   }
   
-  componentDidMount() {
-    // setTimeout(() => {
-    //   this.refs.list.measure((x,y,widht,height,left,top) => {
-    //     console.log(height)
-    //   })
-    // })
-    
-  }
-
-  
   render() {
     return (
       <View style={styles.container}>
