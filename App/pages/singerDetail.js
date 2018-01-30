@@ -43,17 +43,12 @@ export default class SingerDetail extends Component{
       .then((request) => {
         if(request.code === 0) {
           this._normalizeSongs(request.data.list)
-          // this.setState({bannerData: request.data})
         }
       })
       .catch((error) => {
         console.log(error)
       })
   }
-  
-  // componentWillMount() {
-  //   this._normalizeSongs(this.singerDetail.data.list)
-  // }
   
   _normalizeSongs (list) {
     let ret = []
@@ -127,10 +122,13 @@ export default class SingerDetail extends Component{
                       [{ nativeEvent: { contentOffset: { y: this.state.scrollY }}}],
                       { useNativeDriver: true }
                     )}
-                    renderItem={({item}) => {
+                    renderItem={({item, index}) => {
                       return (
                         <TouchableOpacity onPress={() => {
-                          jumpPager(this.props.navigation.navigate, 'PlayerScence', null)
+                          jumpPager(this.props.navigation.navigate, 'PlayerScence', {
+                            songs: this.state.singerData,
+                            currentIndex: index
+                          })
                         }}>
                           <View style={styles.listGroup}>
                             <Text numberOfLines={1} style={styles.singer_name}>{item.name}</Text>

@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#import < AVFoundation / AVFoundation.h >
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
@@ -17,6 +18,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
+
+  [[AVAudioSession sharedInstance ] setCategory： AVAudioSessionCategoryAmbient error：nil ];
 
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 

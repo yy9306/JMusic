@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "react-native link"
   },
   "dependencies": {
+    "prop-types": "^15.6.0",
     "react": "16.0.0",
     "react-native": "0.51.0",
     "react-native-blur-image": "^1.0.6",
@@ -21,7 +23,8 @@
     "react-navigation": "^1.0.0-beta.23",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
-    "redux-thunk": "^2.2.0"
+    "redux-thunk": "^2.2.0",
+    "rnpm": "^1.9.0"
   },
   "devDependencies": {
     "babel-jest": "21.2.0",
