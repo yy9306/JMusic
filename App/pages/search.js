@@ -7,6 +7,7 @@ import {
   Image,
   StatusBar,
   Dimensions,
+  ActivityIndicator,
   TouchableOpacity,
   FlatList,
   ScrollView
@@ -31,6 +32,7 @@ export default class Search extends Component{
       txtValue: '',
       page: 1,
       opacity: 1,
+      hasMore: true,
       showSinger: true,
     }
     this.HttpMusic = new HttpMusic()
@@ -49,16 +51,42 @@ export default class Search extends Component{
         console.log(error)
       })
   }
+  
   changText(text) {
+    this.setState({page: 1})
     this.setState({txtValue: text}, () => {
       this.HttpMusic.getSearch(this.state.txtValue, this.state.page, this.state.showSinger, perpage)
         .then((request) => {
           if(request.code === 0) {
             let ret = this._genResult(request.data)
             this.setState({result: ret})
+            this._checkMore(request.data)
           }
         })
     })
+  }
+  
+  searchMore() {
+    if (!this.state.hasMore) {
+      return
+    }
+    this.setState({page: this.state.page++}, () => {
+      this.HttpMusic.getSearch(this.state.txtValue, this.state.page, this.state.showSinger, perpage).then((res) => {
+        if (res.code === 0) {
+          let result = this.state.result.concat(this._genResult(res.data))
+          this.setState({result, result})
+          this._checkMore(res.data)
+        }
+      })
+    })
+  }
+  
+  
+  _checkMore(data) {
+    const song = data.song
+    if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
+      this.setState({hasMore: false})
+    }
   }
   
   _genResult(data) {
@@ -116,6 +144,22 @@ export default class Search extends Component{
     }
   }
   
+  _onEndReached() {
+    this.searchMore()
+  }
+  
+  _renderFooter() {
+    if(this.state.hasMore) {
+      return (
+        <ActivityIndicator />
+      )
+    }else {
+      return (
+        <Text />
+      )
+    }
+  }
+  
   render() {
     return (
       <View style={styles.container}>
@@ -154,6 +198,9 @@ export default class Search extends Component{
             <FlatList data={this.state.result}
                       keyExtractor={(item, index) => index}
                       showsVerticalScrollIndicator={false}
+                      onEndReached={this._onEndReached.bind(this)}
+                      onEndReachedThreshold={-0.1}
+                      ListFooterComponent={this._renderFooter.bind(this)}
                       renderItem={({item, index}) => {
                         return (
                           <View style={{width: width, paddingBottom: 20, flex: 1}}>
