@@ -53,10 +53,10 @@ export default class Header extends Component{
                            tabBarInactiveTextColor="hsla(0,0%,100%,.5)"
                            tabBarUnderlineStyle={{backgroundColor: '#ffcd32'}}
                            renderTabBar={() => <DefaultTabBar />}>
-          <Recommend tabLabel='推荐'/>
+          <Recommend navigate={this.props.navigation.navigate} tabLabel='推荐'/>
           <SingerL navigate={this.props.navigation.navigate} tabLabel='歌手'/>
           <Rank navigate={this.props.navigation.navigate} tabLabel='排行'/>
-          <Search tabLabel='搜索'/>
+          <Search navigate={this.props.navigation.navigate} tabLabel='搜索'/>
         </ScrollableTabView>
       </View>
     )

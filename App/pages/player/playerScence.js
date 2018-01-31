@@ -33,7 +33,7 @@ export default class PlayerScence extends Component{
     this.state = {
       songs: [],   //歌曲id数据源
       playModel:1,  // 播放模式  1:列表循环    2:随机    3:单曲循环
-      btnModel:require('../img/列表循环.png'), //播放模式按钮背景图
+      btnModel:require('../img/icon_mode.png'), //播放模式按钮背景图
       pic_small: '',    //小图
       pic_big: '',      //大图
       file_duration: '',    //歌曲长度
@@ -47,7 +47,7 @@ export default class PlayerScence extends Component{
       currentTime: 0.0,   //当前时间
       duration: 0.0,     //歌曲时间
       currentIndex:0,    //当前第几首
-      isplayBtn: require('../img/播放.png'),  //播放/暂停按钮背景图
+      isplayBtn: require('../img/icon_play.png'),  //播放/暂停按钮背景图
       imgRotate: new Animated.Value(0),
     }
     this.isGoing = false; //为真旋转
@@ -168,11 +168,11 @@ export default class PlayerScence extends Component{
     //判断按钮显示什么
     if(this.state.pause === true){
       this.setState({
-        isplayBtn:require('../img/播放.png')
+        isplayBtn:require('../img/icon_pause.png')
       })
     }else {
       this.setState({
-        isplayBtn:require('../img/暂停.png')
+        isplayBtn:require('../img/icon_play.png')
       })
     }
     
@@ -267,22 +267,16 @@ export default class PlayerScence extends Component{
             />
           
             {/*播放器*/}
-            <Video
-              source={{uri: this.state.file_link}}
-              ref='video'
-              volume={1.0}
-              paused={this.state.pause}
-              onProgress={(e) => this.onProgress(e)}
-              onLoad={(e) => this.onLoad(e)}
-              playInBackground={true}
-            />
+            {/*<Video*/}
+              {/*source={{uri: this.state.file_link}}*/}
+              {/*ref='video'*/}
+              {/*volume={1.0}*/}
+              {/*paused={this.state.pause}*/}
+              {/*onProgress={(e) => this.onProgress(e)}*/}
+              {/*onLoad={(e) => this.onLoad(e)}*/}
+              {/*playInBackground={true}*/}
+            {/*/>*/}
             <View style={styles.bottom}>
-              {/*播放模式*/}
-              {/*<View style = {{marginTop: 5,marginBottom:5,marginLeft: 20}}>*/}
-                {/*<TouchableOpacity onPress={()=>this.playModel(this.state.playModel)}>*/}
-                  {/*<Image source={this.state.btnModel} style={{width:20,height:20}}/>*/}
-                {/*</TouchableOpacity>*/}
-              {/*</View>*/}
               {/*进度条*/}
               <View style={styles.progress}>
                 <Text style={{color: '#fff'}}>{this.formatTime(Math.floor(this.state.currentTime))}</Text>
@@ -307,19 +301,23 @@ export default class PlayerScence extends Component{
               </View>
               {/*歌曲按钮*/}
               <View style = {{flexDirection:'row',width: width, alignItems: 'center', justifyContent: 'center'}}>
-                <TouchableOpacity onPress={()=>this.playModel(this.state.playModel)} style={{width: 0.25*width, alignItems: 'center'}}>
-                  <Image source={this.state.btnModel} style={{width:20,height:20}}/>
+                <TouchableOpacity onPress={()=>this.playModel(this.state.playModel)} style={{width: 0.2*width, alignItems: 'center'}}>
+                  <Image source={this.state.btnModel} style={{width:30,height:30}}/>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>this.prevAction(this.state.currentIndex - 1)} style={{width: 0.25*width, alignItems: 'center'}}>
-                  <Image source={require('../img/上一首.png')} style={{width:30,height:30}}/>
-                </TouchableOpacity>
-    
-                <TouchableOpacity onPress={()=>this.playAction()} style={{width: 0.25*width, alignItems: 'center'}}>
-                  <Image source={this.state.isplayBtn} style={{width:30,height:30}}/>
+                <TouchableOpacity onPress={()=>this.prevAction(this.state.currentIndex - 1)} style={{width: 0.2*width, alignItems: 'center'}}>
+                  <Image source={require('../img/icon_prev.png')} style={{width:30,height:30}}/>
                 </TouchableOpacity>
     
-                <TouchableOpacity onPress={()=>this.nextAction(this.state.currentIndex + 1)} style={{width: 0.25*width, alignItems: 'center'}}>
-                  <Image source={require('../img/下一首.png')} style={{width:30,height:30}}/>
+                <TouchableOpacity onPress={()=>this.playAction()} style={{width: 0.2*width, alignItems: 'center'}}>
+                  <Image source={this.state.isplayBtn} style={{width:40,height:40}}/>
+                </TouchableOpacity>
+    
+                <TouchableOpacity onPress={()=>this.nextAction(this.state.currentIndex + 1)} style={{width: 0.2*width, alignItems: 'center'}}>
+                  <Image source={require('../img/icon_next.png')} style={{width:30,height:30}}/>
+                </TouchableOpacity>
+  
+                <TouchableOpacity style={{width: 0.2*width, alignItems: 'center'}}>
+                  <Image source={require('../img/icon_love.png')} style={{width:30,height:30}}/>
                 </TouchableOpacity>
               </View>
             </View>

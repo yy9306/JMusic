@@ -31,11 +31,31 @@ export default class SingerDetail extends Component{
       singerData: [],
     }
     this.HttpMusic = new HttpMusic()
-    this.singerDetail = require('../sources/json/singerDetail.json')
     this.title = this.props.navigation.state.params.data.name
     this.avatar = this.props.navigation.state.params.data.avatar
     this.mid = this.props.navigation.state.params.data.id
-    this.requestData(this.mid)
+    this.page = this.props.navigation.state.params.data.page
+  }
+  
+  componentWillMount() {
+    if(this.page === 'Recommend') {
+      this.getSongData(this.mid)
+    } else {
+      this.requestData(this.mid)
+    }
+  }
+  
+  getSongData(mid) {
+    this.HttpMusic.getSongList(mid)
+      .then((request) => {
+        if(request.code === 0) {
+          console.log(request.cdlist[0].songlist.slice(0, 99))
+          this._normalistSong(request.cdlist[0].songlist.slice(0, 99))
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
   
   requestData(mid) {
@@ -50,6 +70,17 @@ export default class SingerDetail extends Component{
       })
   }
   
+  
+  _normalistSong(list) {
+    let ret = []
+    list.forEach((musicData) => {
+      if (isValidMusic(musicData)) {
+        ret.push(createSong(musicData))
+      }
+    })
+    this.setState({singerData: ret})
+  }
+  
   _normalizeSongs (list) {
     let ret = []
     list.forEach((item) => {
@@ -62,13 +93,14 @@ export default class SingerDetail extends Component{
   }
   
   render() {
+    // let Avatar = this.avatar.replace(/(?=\:)/g, 's')
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={() => {this.props.navigation.goBack()}} style={styles.back}>
            <Image style={{width: 26, height: 26}}  source={require('./img/icon_back.png')}/>
         </TouchableOpacity>
         <View style={styles.titleWrapper}>
-          <Text style={styles.title}>{this.props.navigation.state.params.data.title}</Text>
+          <Text style={styles.title} numberOfLines={1}>{this.props.navigation.state.params.data.title}</Text>
         </View>
         <Animated.Image style={{
           resizeMode: 'cover',

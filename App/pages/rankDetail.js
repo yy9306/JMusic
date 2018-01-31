@@ -35,7 +35,6 @@ export default class RankDetail extends Component{
     this.HttpMusic.getRankDetail(id)
       .then((request) => {
         if(request.code === 0) {
-          console.log(request.topinfo.ListName)
           this.title = request.topinfo.ListName
           this.setState({rankList: this._normalizeSongs(request.songlist)})
         }
@@ -50,7 +49,6 @@ export default class RankDetail extends Component{
       const musicData = item.data
       ret.push(createSong(musicData))
     })
-    console.log(ret)
     return ret.slice(0, 99)
   }
   
@@ -140,7 +138,12 @@ export default class RankDetail extends Component{
             )}
             renderItem={({item, index}) => {
               return (
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                  jumpPager(this.props.navigation.navigate, 'PlayerScence', {
+                    songs: this.state.rankList,
+                    currentIndex: index
+                  })
+                }}>
                   <View style={styles.listGroup}>
                     {this._renderNumber(index)}
                     <View>

@@ -83,7 +83,6 @@ export default class Recommend extends Component{
                       marginBottom: 3
                     }}/>} loop
             >
-              {/*{this.state.bannerData.slider && this.state.bannerData.slider.length && this._swiperChildrenView()}*/}
               {this.state.bannerData.slider.map((item, index) => {
                 let reg = /(?=\:)/g
                 let imgUrl = item.picUrl.replace(reg, 's')
@@ -101,12 +100,19 @@ export default class Recommend extends Component{
             <Text style={styles.hot}>热门推荐歌单</Text>
           </View>
           <View style={styles.scrollLists} ref="scrollLists">
-            {/*{this._renderItemView(this.DesList)}*/}
             {this.state.decList.map((item, index) => {
               let reg = /(?=\:)/g
               let image = item.imgurl.replace(reg, 's')
+              // console.log(item)
               return (
-                <TouchableOpacity key={index} >
+                <TouchableOpacity key={index} onPress={() => {
+                   jumpPager(this.props.navigate, 'SingerDetail', {
+                     title: item.dissname,
+                     avatar: item.imgurl.replace(/(?=\:)/g, 's'),
+                     id: item.dissid,
+                     page: 'Recommend'
+                   })
+                }}>
                   <View style={styles.scrollList}>
                     <Image style={styles.scroll_list_image} source={{uri: image}} />
                     <View style={styles.scroll_right_list}>

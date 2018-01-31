@@ -178,23 +178,21 @@ export default class SingerL extends Component {
   renderItem(section: number, row: number) {
     let singer = this.state.Singerlist[section].items[row];
     return (
-      <TouchableOpacity style={{ flex: 1}}
-        onPress={() => {
-          jumpPager(this.props.navigate, 'SingerDetail', {
-            title: singer.name,
-            avatar: singer.avatar,
-            id: singer.id
-          })
-        }}
+      <TouchableOpacity style={{flex: 1}}
+                        onPress={() => {
+                          jumpPager(this.props.navigate, 'SingerDetail', {
+                            title: singer.name,
+                            avatar: singer.avatar,
+                            id: singer.id
+                          })
+                        }}
       >
-        {/*<View style={{ flex: 1}}>*/}
-          <View style={{ flex: 1, paddingLeft: 20, flexDirection: 'row', alignItems: 'center'}}>
-            <Image style={{width: 50, height: 50, borderRadius: 25, marginRight: 20}} source={{uri: singer.avatar}}/>
-            <Text style={{color: 'hsla(0,0%,100%,.5)'}}>
-              {singer.name}
-              </Text>
-          </View>
-        {/*</View>*/}
+        <View style={{flex: 1, paddingLeft: 20, flexDirection: 'row', alignItems: 'center'}}>
+          <Image style={{width: 50, height: 50, borderRadius: 25, marginRight: 20}} source={{uri: singer.avatar}}/>
+          <Text style={{color: 'hsla(0,0%,100%,.5)'}}>
+            {singer.name}
+          </Text>
+        </View>
       </TouchableOpacity>
     )
   }
