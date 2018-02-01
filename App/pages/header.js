@@ -11,7 +11,7 @@ import {
   ScrollView
 } from 'react-native'
 
-import ScrollableTabView, {DefaultTabBar, } from 'react-native-scrollable-tab-view';
+import ScrollableTabView, {DefaultTabBar} from 'react-native-scrollable-tab-view';
 import NavBarView from '../base/NavBarView'
 import {jumpPager,width} from '../base/Utils'
 import Recommend from './recommend'
