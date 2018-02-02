@@ -23,7 +23,7 @@ export default class SingerDetail extends Component{
   static navigationOptions = {
     header: null,
   }
-  
+
   constructor(props) {
     super(props)
     this.state = {
@@ -36,7 +36,7 @@ export default class SingerDetail extends Component{
     this.mid = this.props.navigation.state.params.data.id
     this.page = this.props.navigation.state.params.data.page
   }
-  
+
   componentWillMount() {
     if(this.page === 'Recommend') {
       this.getSongData(this.mid)
@@ -44,7 +44,7 @@ export default class SingerDetail extends Component{
       this.requestData(this.mid)
     }
   }
-  
+
   getSongData(mid) {
     this.HttpMusic.getSongList(mid)
       .then((request) => {
@@ -57,7 +57,7 @@ export default class SingerDetail extends Component{
         console.log(error)
       })
   }
-  
+
   requestData(mid) {
     this.HttpMusic.getDetailSinger(mid)
       .then((request) => {
@@ -69,8 +69,8 @@ export default class SingerDetail extends Component{
         console.log(error)
       })
   }
-  
-  
+
+
   _normalistSong(list) {
     let ret = []
     list.forEach((musicData) => {
@@ -78,9 +78,10 @@ export default class SingerDetail extends Component{
         ret.push(createSong(musicData))
       }
     })
+    console.log(ret)
     this.setState({singerData: ret})
   }
-  
+
   _normalizeSongs (list) {
     let ret = []
     list.forEach((item) => {
@@ -91,7 +92,7 @@ export default class SingerDetail extends Component{
     })
     this.setState({singerData: ret})
   }
-  
+
   render() {
     // let Avatar = this.avatar.replace(/(?=\:)/g, 's')
     return (
@@ -226,4 +227,3 @@ const styles = StyleSheet.create({
     color: 'hsla(0,0%,100%,.3)'
   }
 })
-

@@ -21,6 +21,7 @@ import Video from 'react-native-video'
 import BlurImage from 'react-native-blur-image'
 import {width,height, jumpPager} from '../../base/Utils'
 
+
 var myAnimate;
 export default class PlayerScence extends Component{
   static navigationOptions = {
@@ -130,7 +131,7 @@ export default class PlayerScence extends Component{
         this.nextAction(random) //播放
       }else{
         //单曲 就再次播放当前这首歌曲
-        this.refs.video.seek(0) //让video 重新播放
+        this.video.seek(0) //让video 重新播放
         _scrollView.scrollTo({x: 0,y:0,animated:false});
       }
     }
@@ -182,7 +183,7 @@ export default class PlayerScence extends Component{
   nextAction = (index) =>{
     this.recover()
     lyrObj = [];
-    if(index === 10){
+    if(index === this.state.songs.length){
       index = 0 //如果是最后一首就回到第一首
     }
     this.setState({
@@ -267,15 +268,17 @@ export default class PlayerScence extends Component{
             />
           
             {/*播放器*/}
-            {/*<Video*/}
+            {/*{this.state.file_link && this.state.file_link.length>0 && <Video*/}
               {/*source={{uri: this.state.file_link}}*/}
-              {/*ref='video'*/}
+              {/*ref={(ref) => {this.video = ref}}*/}
+              {/*rate={1.0}*/}
               {/*volume={1.0}*/}
+              {/*muted={false}*/}
               {/*paused={this.state.pause}*/}
               {/*onProgress={(e) => this.onProgress(e)}*/}
               {/*onLoad={(e) => this.onLoad(e)}*/}
-              {/*playInBackground={true}*/}
-            {/*/>*/}
+              {/*playInBackground*/}
+            {/*/> }*/}
             <View style={styles.bottom}>
               {/*进度条*/}
               <View style={styles.progress}>
@@ -301,7 +304,7 @@ export default class PlayerScence extends Component{
               </View>
               {/*歌曲按钮*/}
               <View style = {{flexDirection:'row',width: width, alignItems: 'center', justifyContent: 'center'}}>
-                <TouchableOpacity onPress={()=>this.playModel(this.state.playModel)} style={{width: 0.2*width, alignItems: 'center'}}>
+                <TouchableOpacity style={{width: 0.2*width, alignItems: 'center'}}>
                   <Image source={this.state.btnModel} style={{width:30,height:30}}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>this.prevAction(this.state.currentIndex - 1)} style={{width: 0.2*width, alignItems: 'center'}}>
@@ -321,16 +324,6 @@ export default class PlayerScence extends Component{
                 </TouchableOpacity>
               </View>
             </View>
-          
-            {/*歌词*/}
-            {/*<View style={{height:140,alignItems:'center'}}>*/}
-            
-              {/*<ScrollView style={{position:'relative'}}*/}
-                          {/*ref={(scrollView) => { _scrollView = scrollView}}*/}
-              {/*>*/}
-                {/*{this.renderItem()}*/}
-              {/*</ScrollView>*/}
-            {/*</View>*/}
           </View>
       
         </View>

@@ -1,31 +1,31 @@
 
 # JMusic
 
-最近学习了react-native的一些知识，想做一个个人项目， 发现没有好的素材下手，想起之前学习过黄佚老师炸鸡音乐的课程，于是就想用react-native实现一边，黄佚老师的这门课含金量还是很高的， 如果认真学习下来，是可以提高一个层次
+最近学习了react-native的一些知识，想做一个个人项目， 发现没有好的素材下手，想起之前学习过黄轶老师炸鸡音乐的课程，于是就想用react-native实现一遍，黄佚老师的这门课含金量还是很高的， 如果认真学习下来，是可以提高一个层次
 
- >  进阶链接[炸鸡音乐](https://coding.imooc.com/class/107.html)
+ >  进阶链接 [炸鸡音乐](https://coding.imooc.com/class/107.html)
 
 ## 效果图
 
 #### 总览
 
-![](./display/QQ20180201-103028-HD.gif)
+![](./display/QQ20180202-154624-HD.gif)
 
 #### 歌手
 
-![](./display/QQ20180201-103255-HD.gif)
+![](./display/QQ20180202-154832-HD.gif)
 
 #### 播放列表页
 
-![](./display/QQ20180201-103416-HD.gif)
+![](./display/QQ20180202-155110-HD.gif)
 
 #### 搜索页面
 
-![](./display/QQ20180201-103536-HD.gif)
+![](./display/QQ20180202-160432-HD.gif)
 
 #### 播放页面
 
-![](./display/QQ20180201-103654-HD.gif)
+![](./display/QQ20180202-155802-HD.gif)
 
 ## 主要的技术栈和第三方类库
 
@@ -55,6 +55,8 @@
 ## 总结
 
 这是我第一个react-native项目，还有许多不足之处， 后期会慢慢优化的
+
+这个项目由于我的iphonex模拟器有点问题没有兼容，做兼容也很简单， [兼容链接](https://github.com/yy9306/react-native-iphone-x-helper)
 
 首先要熟悉flex布局，注重排列方式
 
