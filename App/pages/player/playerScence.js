@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import {
   View,
   Text,
@@ -15,18 +15,23 @@ import {
   ActivityIndicator,
   Easing
 } from 'react-native'
-
-// import Video from '../../common/Video'
 import Video from 'react-native-video'
+import HttpMusic from '../../api/api'
 import BlurImage from 'react-native-blur-image'
 import {width,height, jumpPager} from '../../base/Utils'
 
 
+var Buffer = require('buffer').Buffer;
+
+var lyrObj = []; //用于存放歌词
+
 var myAnimate;
-export default class PlayerScence extends Component{
+export default class Play extends Component {
+
   static navigationOptions = {
     header: null,
   }
+
   constructor(props) {
     super(props)
     this.navigate = this.props.navigation.state.params.data
@@ -48,7 +53,7 @@ export default class PlayerScence extends Component{
       currentTime: 0.0,   //当前时间
       duration: 0.0,     //歌曲时间
       currentIndex:0,    //当前第几首
-      isplayBtn: require('../img/icon_play.png'),  //播放/暂停按钮背景图
+      isplayBtn: require('../img/icon_pause.png'),  //播放/暂停按钮背景图
       imgRotate: new Animated.Value(0),
     }
     this.isGoing = false; //为真旋转
@@ -57,15 +62,17 @@ export default class PlayerScence extends Component{
       duration: 6000,
       easing: Easing.inOut(Easing.linear),
     });
-    console.log(this.navigate)
+
+    this.HttpMusic = new HttpMusic()
     this.bgColor = '#222'
+
   }
-  
+
   componentDidMount() {
     this.stop()
     this.loadSongInfo(this.navigate.currentIndex)
   }
-  
+
   imgMoving = () => {
     if (this.isGoing) {
       this.state.imgRotate.setValue(0);
@@ -74,10 +81,10 @@ export default class PlayerScence extends Component{
       })
     }
   }
-  
+
   stop = () => {
     this.isGoing = !this.isGoing;
-    
+
     if (this.isGoing) {
       this.myAnimate.start(() => {
         this.myAnimate = Animated.timing(this.state.imgRotate, {
@@ -96,22 +103,64 @@ export default class PlayerScence extends Component{
           easing: Easing.inOut(Easing.linear),
         });
       });
-      
+
     }
-    
-  };
-  
+
+  }
+
   loadSongInfo(index) {
+    let reg = /(?=\:)/g
+    this._getLyric(this.navigate.songs[index].mid)
+
     this.setState({
       pic_small:this.navigate.songs[index].image, //小图
       pic_big:this.navigate.songs[index].image,  //大图
       title:this.navigate.songs[index].name,     //歌曲名
       author:this.navigate.songs[index].singer,   //歌手
-      file_link:this.navigate.songs[index].url,   //播放链接
+      file_link:this.navigate.songs[index].url.replace(reg, 's'),   //播放链接
       file_duration:this.navigate.songs[index].duration //歌曲长度
     })
   }
-  
+
+  _getLyric(mid) {
+    this.HttpMusic.getLyric(mid)
+      .then((res) => {
+        if(res.code === 0) {
+          let lry = new Buffer(res.lyric, 'base64')
+          let lryAry = lry.toString().split('\n')
+          lryAry.forEach(function (val, index) {
+            var obj = {}   //用于存放时间
+            val = val.replace(/(^\s*)|(\s*$)/g, '')
+            let indeofLastTime = val.indexOf(']')  // ]的下标
+            let timeStr = val.substring(1, indeofLastTime) //把时间切出来 0:04.19
+            let minSec = ''
+            let timeMsIndex = timeStr.indexOf('.')  // .的下标
+            if (timeMsIndex !== -1) {
+              //存在毫秒 0:04.19
+              minSec = timeStr.substring(1, val.indexOf('.'))  // 0:04.
+              obj.ms = parseInt(timeStr.substring(timeMsIndex + 1, indeofLastTime))  //毫秒值 19
+            } else {
+              //不存在毫秒 0:04
+              minSec = timeStr
+              obj.ms = 0
+            }
+
+            let curTime = minSec.split(':')  // [0,04]
+            obj.min = parseInt(curTime[0])   //分钟 0
+            obj.sec = parseInt(curTime[1])   //秒钟 04
+            obj.txt = val.substring(indeofLastTime + 1, val.length) //歌词文本: 留下唇印的嘴
+            obj.txt = obj.txt.replace(/(^\s*)|(\s*$)/g, '')
+            obj.dis = false
+            obj.total = obj.min * 60 + obj.sec + obj.ms / 100   //总时间
+
+            if (obj.txt.length > 0) {
+              lyrObj.push(obj)
+            }
+          })
+        }
+      })
+  }
+
   //播放器每隔250ms调用一次
   onProgress =(data) => {
     let val = parseInt(data.currentTime)
@@ -119,7 +168,7 @@ export default class PlayerScence extends Component{
       sliderValue: val,
       currentTime: data.currentTime
     })
-    
+
     //如果当前歌曲播放完毕,需要开始下一首
     if(val === this.state.file_duration){
       if(this.state.playModel === 1){
@@ -136,7 +185,7 @@ export default class PlayerScence extends Component{
       }
     }
   }
-  
+
   //把秒数转换为时间类型
   formatTime(time) {
     // 71s -> 01:11
@@ -146,11 +195,11 @@ export default class PlayerScence extends Component{
     second = second >= 10 ? second : '0' + second
     return min + ':' + second
   }
-  
+
   //上一曲
   prevAction = (index) =>{
     this.recover()
-    // lyrObj = [];
+    lyrObj = [];
     if(index === -1){
       index = this.navigate.songs.length - 1 // 如果是第一首就回到最后一首歌
     }
@@ -159,7 +208,7 @@ export default class PlayerScence extends Component{
     })
     this.loadSongInfo(index)  //加载数据
   }
-  
+
   //播放/暂停
   playAction =() => {
     this.stop()
@@ -176,9 +225,8 @@ export default class PlayerScence extends Component{
         isplayBtn:require('../img/icon_play.png')
       })
     }
-    
   }
-  
+
   //下一曲
   nextAction = (index) =>{
     this.recover()
@@ -191,7 +239,7 @@ export default class PlayerScence extends Component{
     })
     this.loadSongInfo(index)   //加载数据
   }
-  
+
   //换歌时恢复进度条 和起始时间
   recover = () =>{
     this.setState({
@@ -199,7 +247,7 @@ export default class PlayerScence extends Component{
       currentTime: 0.0
     })
   }
-  
+
   //旋转动画
   spin () {
     this.spinValue.setValue(0)
@@ -211,74 +259,114 @@ export default class PlayerScence extends Component{
         easing: Easing.linear
       }
     ).start(() => this.spin())
-    
+
   }
-  
+
   // 播放器加载好时调用,其中有一些信息带过来
   onLoad = (data) => {
     this.setState({ duration: data.duration });
   }
-  
-  
-  render() {
-    //如果未加载出来数据 就一直加载
-    if (this.state.file_link.length <= 0 ) {
-      return(
-        <ActivityIndicator
-          animating={this.state.animating}
-          style={{flex: 1,alignItems: 'center',justifyContent: 'center'}}
-          size="large" />
-      )
-    }else{
-      const spin = this.spinValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['0deg', '360deg']
-      })
-    
-    
-      //数据加载出来
-      return (
-        <View style={styles.container}>
-        
-          {/*背景大图*/}
-          <BlurImage
-            source={{ uri:this.state.pic_big }}
-            style={{flex:1}}
-            blurRadius={50}
-          />
-          {/*作者-歌名*/}
-          <View style={styles.title_wrapper}>
-            <Text numberOfLines={1} style={{color: '#fff', fontSize: 18, marginBottom: 10}}>{this.state.author}</Text>
-            <Text numberOfLines={1} style={{color: '#fff', fontSize: 14}}>{this.state.title}</Text>
+
+
+  // 歌词
+  renderItem() {
+    // 数组
+    var itemAry = [];
+    for (var i = 0; i < lyrObj.length; i++) {
+      var item = lyrObj[i].txt
+      if (this.state.currentTime.toFixed(2) > lyrObj[i].total) {
+        //正在唱的歌词
+        itemAry.push(
+          <View key={i} style={styles.itemStyle}>
+            <Text style={{ color: 'white', fontSize: 14 }}> {item} </Text>
           </View>
-          
-          <View style = {{position:'absolute', top: 90, bottom: 170, width: width}}>
-            {/*胶片光盘*/}
-            <Image source={require('../img/胶片盘.png')} style={{width:260,height:260,alignSelf:'center'}}/>
-          
-            {/*旋转小图*/}
-            <Animated.Image
-              ref = 'myAnimate'
-              style={{width:210,height:210,marginTop: -235,alignSelf:'center',borderRadius: 200*0.5,transform: [{rotate: this.state.imgRotate.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0deg', '360deg']
-                  })
-                }]}}
-              source={{uri: this.state.pic_small}}
+        );
+        if(i < 5) {
+          _scrollView.scrollTo({x: 0,y: 0,animated:false});
+        } else {
+          _scrollView.scrollTo({x: 0,y:(32 * (i-4)),animated:false});
+        }
+      }
+      else {
+        //所有歌词
+        itemAry.push(
+          <View key={i} style={styles.itemStyle}>
+            <Text style={{ color: 'hsla(0,0%,100%,.5)', fontSize: 14 }}> {item} </Text>
+          </View>
+        )
+      }
+    }
+
+    return itemAry;
+  }
+
+  render() {
+      if (this.state.file_link.length <= 0 ) {
+        return(
+          <ActivityIndicator
+            animating={this.state.animating}
+            style={{flex: 1,alignItems: 'center',justifyContent: 'center'}}
+            size="large" />
+        )
+      }else {
+        const spin = this.spinValue.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '360deg']
+        })
+
+        return (
+          <View style={styles.container}>
+            {/*背景大图*/}
+            <BlurImage
+              source={{uri: this.state.pic_big}}
+              style={{flex: 1}}
+              blurRadius={50}
             />
-          
+
+            {/*作者-歌名*/}
+            <View style={styles.title_wrapper}>
+              <Text numberOfLines={1} style={{color: '#fff', fontSize: 18, marginBottom: 10}}>{this.state.author}</Text>
+              <Text numberOfLines={1} style={{color: '#fff', fontSize: 14}}>{this.state.title}</Text>
+            </View>
+            <ScrollView style = {styles.scrollView}
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        pagingEnabled={true}>
+              <View style={{width: width, flex: 1}}>
+                {/*胶片光盘*/}
+                <Image source={require('../img/胶片盘.png')} style={{width:260,height:260,alignSelf:'center'}}/>
+
+                {/*旋转小图*/}
+                <Animated.Image
+                  ref = 'myAnimate'
+                  style={{width:210,height:210,marginTop: -235,alignSelf:'center',borderRadius: 200*0.5,transform: [{rotate: this.state.imgRotate.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '360deg']
+                      })
+                    }]}}
+                  source={{uri: this.state.pic_small}}
+                />
+              </View>
+              <View style={{width: width, flex: 1, alignItems:'center', paddingTop: 30, paddingBottom: 30}}>
+                <ScrollView style={{position:'relative'}}
+                            ref={(scrollView) => { _scrollView = scrollView}}
+                >
+                  {this.renderItem()}
+                </ScrollView>
+              </View>
+            </ScrollView>
+
             {/*播放器*/}
-            {/*{this.state.file_link && this.state.file_link.length>0 && <Video*/}
-              {/*source={{uri: this.state.file_link}}*/}
-              {/*ref={(ref) => {this.video = ref}}*/}
-              {/*rate={1.0}*/}
-              {/*volume={1.0}*/}
-              {/*muted={false}*/}
-              {/*paused={this.state.pause}*/}
-              {/*onProgress={(e) => this.onProgress(e)}*/}
-              {/*onLoad={(e) => this.onLoad(e)}*/}
-              {/*playInBackground*/}
-            {/*/> }*/}
+            {this.state.file_link && this.state.file_link.length>0 && <Video
+              source={{uri: this.state.file_link}}
+              ref={(ref) => {this.video = ref}}
+              rate={1.0}
+              volume={1.0}
+              muted={false}
+              paused={this.state.pause}
+              onProgress={(e) => this.onProgress(e)}
+              onLoad={(e) => this.onLoad(e)}
+            /> }
             <View style={styles.bottom}>
               {/*进度条*/}
               <View style={styles.progress}>
@@ -297,38 +385,36 @@ export default class PlayerScence extends Component{
                   }
                   }
                   onSlidingComplete={(value) => {
-                    this.refs.video.seek(value)
+                    this.video.seek(value)
                   }}
                 />
                 <Text style={{color: '#fff'}}>{this.formatTime(Math.floor(this.state.duration))}</Text>
               </View>
               {/*歌曲按钮*/}
               <View style = {{flexDirection:'row',width: width, alignItems: 'center', justifyContent: 'center'}}>
-                <TouchableOpacity style={{width: 0.2*width, alignItems: 'center'}}>
+                <TouchableOpacity onPress={()=>this.playModel(this.state.playModel)} style={{width: 0.2*width, alignItems: 'center'}}>
                   <Image source={this.state.btnModel} style={{width:30,height:30}}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>this.prevAction(this.state.currentIndex - 1)} style={{width: 0.2*width, alignItems: 'center'}}>
                   <Image source={require('../img/icon_prev.png')} style={{width:30,height:30}}/>
                 </TouchableOpacity>
-    
+
                 <TouchableOpacity onPress={()=>this.playAction()} style={{width: 0.2*width, alignItems: 'center'}}>
                   <Image source={this.state.isplayBtn} style={{width:40,height:40}}/>
                 </TouchableOpacity>
-    
+
                 <TouchableOpacity onPress={()=>this.nextAction(this.state.currentIndex + 1)} style={{width: 0.2*width, alignItems: 'center'}}>
                   <Image source={require('../img/icon_next.png')} style={{width:30,height:30}}/>
                 </TouchableOpacity>
-  
+
                 <TouchableOpacity style={{width: 0.2*width, alignItems: 'center'}}>
                   <Image source={require('../img/icon_love.png')} style={{width:30,height:30}}/>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
-      
-        </View>
-      )
-    }
+        )
+      }
   }
 }
 
@@ -386,13 +472,18 @@ const styles = StyleSheet.create({
   },
   itemStyle: {
     paddingTop: 20,
-    height:25,
+    height:32,
     backgroundColor:'rgba(255,255,255,0.0)',
+    alignItems: 'center'
+  },
+  scrollView: {
+    position:'absolute',
+    top: 90,
+    bottom: 170,
   },
   bottom: {
     position: 'absolute',
-    top: height-300,
-    bottom: 0,
+    bottom: 50,
     width: width,
-  }
+  },
 })

@@ -49,7 +49,6 @@ export default class SingerDetail extends Component{
     this.HttpMusic.getSongList(mid)
       .then((request) => {
         if(request.code === 0) {
-          console.log(request.cdlist[0].songlist.slice(0, 99))
           this._normalistSong(request.cdlist[0].songlist.slice(0, 99))
         }
       })
