@@ -55,6 +55,7 @@ export default class Play extends Component {
       currentIndex:0,    //当前第几首
       isplayBtn: require('../img/icon_pause.png'),  //播放/暂停按钮背景图
       imgRotate: new Animated.Value(0),
+      currentShow: 'cd'
     }
     this.isGoing = false; //为真旋转
     this.myAnimate = Animated.timing(this.state.imgRotate, {
@@ -65,14 +66,25 @@ export default class Play extends Component {
 
     this.HttpMusic = new HttpMusic()
     this.bgColor = '#222'
-
   }
 
   componentDidMount() {
     this.stop()
     this.loadSongInfo(this.navigate.currentIndex)
   }
-
+  componentWillUpdate(nextProps, nextState) {
+    var itemAry = [];
+    for (var i = 0; i < lyrObj.length; i++) {
+      var item = lyrObj[i].txt
+      if (nextState.currentTime && nextState.currentTime.toFixed(2) > lyrObj[i].total) {
+        if (i < 5) {
+          this._scrollView && this._scrollView.scrollTo({x: 0, y: 0, animated: false});
+        } else {
+          this._scrollView && this._scrollView.scrollTo({x: 0, y: (32 * (i - 4)), animated: false});
+        }
+      }
+    }
+  }
   imgMoving = () => {
     if (this.isGoing) {
       this.state.imgRotate.setValue(0);
@@ -110,15 +122,16 @@ export default class Play extends Component {
 
   loadSongInfo(index) {
     let reg = /(?=\:)/g
-    this._getLyric(this.navigate.songs[index].mid)
+    let song = this.navigate.songs[index]
+    this._getLyric(song.mid)
 
     this.setState({
-      pic_small:this.navigate.songs[index].image, //小图
-      pic_big:this.navigate.songs[index].image,  //大图
-      title:this.navigate.songs[index].name,     //歌曲名
-      author:this.navigate.songs[index].singer,   //歌手
-      file_link:this.navigate.songs[index].url.replace(reg, 's'),   //播放链接
-      file_duration:this.navigate.songs[index].duration //歌曲长度
+      pic_small:song.image, //小图
+      pic_big:song.image,  //大图
+      title:song.name,     //歌曲名
+      author:song.singer,   //歌手
+      file_link:song.url.replace(reg, 's'),   //播放链接
+      file_duration:song.duration //歌曲长度
     })
   }
 
@@ -181,7 +194,7 @@ export default class Play extends Component {
       }else{
         //单曲 就再次播放当前这首歌曲
         this.video.seek(0) //让video 重新播放
-        _scrollView.scrollTo({x: 0,y:0,animated:false});
+        this._scrollView.scrollTo({x: 0,y:0,animated:false});
       }
     }
   }
@@ -276,18 +289,20 @@ export default class Play extends Component {
       var item = lyrObj[i].txt
       if (this.state.currentTime.toFixed(2) > lyrObj[i].total) {
         //正在唱的歌词
-        itemAry.push(
-          <View key={i} style={styles.itemStyle}>
-            <Text style={{ color: 'white', fontSize: 14 }}> {item} </Text>
-          </View>
-        );
-        if(i < 5) {
-          _scrollView.scrollTo({x: 0,y: 0,animated:false});
+        if(lyrObj[i+1] && lyrObj[i+1].total && lyrObj[i+1].total < this.state.currentTime.toFixed(2)) {
+          itemAry.push(
+            <View key={i} style={styles.itemStyle}>
+              <Text style={{ color: 'hsla(0,0%,100%,.5)', fontSize: 14 }}> {item} </Text>
+            </View>
+          );
         } else {
-          _scrollView.scrollTo({x: 0,y:(32 * (i-4)),animated:false});
+          itemAry.push(
+            <View key={i} style={styles.itemStyle}>
+              <Text style={{ color: 'white', fontSize: 14 }}> {item} </Text>
+            </View>
+          );
         }
-      }
-      else {
+      } else {
         //所有歌词
         itemAry.push(
           <View key={i} style={styles.itemStyle}>
@@ -298,6 +313,21 @@ export default class Play extends Component {
     }
 
     return itemAry;
+  }
+
+  // 歌词唱片滚动
+  _onScroll(event) {
+    let {contentOffset} = event.nativeEvent
+    // console.log(contentOffset)
+    if(contentOffset.x >= width) {
+      this.setState({
+        currentShow: 'lyric'
+      })
+    } else {
+      this.setState({
+        currentShow: 'cd'
+      })
+    }
   }
 
   render() {
@@ -331,7 +361,11 @@ export default class Play extends Component {
             <ScrollView style = {styles.scrollView}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
-                        pagingEnabled={true}>
+                        pagingEnabled={true}
+                        scrollEventThrottle={20}
+                        onScroll={(e) => {
+                          this._onScroll(e)
+                        }}>
               <View style={{width: width, flex: 1}}>
                 {/*胶片光盘*/}
                 <Image source={require('../img/胶片盘.png')} style={{width:260,height:260,alignSelf:'center'}}/>
@@ -347,9 +381,10 @@ export default class Play extends Component {
                   source={{uri: this.state.pic_small}}
                 />
               </View>
-              <View style={{width: width, flex: 1, alignItems:'center', paddingTop: 30, paddingBottom: 30}}>
+              <View style={{width: width, flex: 1, alignItems:'center', paddingBottom: 46}}>
                 <ScrollView style={{position:'relative'}}
-                            ref={(scrollView) => { _scrollView = scrollView}}
+                            showsVerticalScrollIndicator={false}
+                            ref={(scrollView) => { this._scrollView = scrollView}}
                 >
                   {this.renderItem()}
                 </ScrollView>
@@ -368,6 +403,10 @@ export default class Play extends Component {
               onLoad={(e) => this.onLoad(e)}
             /> }
             <View style={styles.bottom}>
+              <View style={styles.dots}>
+                <View style={[styles.dot, {width: this.state.currentShow === 'cd' ? 20 : 8}]} />
+                <View style={[styles.dot, {width: this.state.currentShow === 'lyric' ? 20 : 8}]} />
+              </View>
               {/*进度条*/}
               <View style={styles.progress}>
                 <Text style={{color: '#fff'}}>{this.formatTime(Math.floor(this.state.currentTime))}</Text>
@@ -444,7 +483,7 @@ const styles = StyleSheet.create({
   progress: {
     width: 0.9*width,
     marginLeft: 0.05*width,
-    paddingTop: 10,
+    paddingTop: 15,
     paddingBottom: 10,
     flexDirection: 'row',
     backgroundColor: 'transparent',
@@ -452,7 +491,6 @@ const styles = StyleSheet.create({
   },
   playingInfo: {
     flexDirection: 'row',
-    // alignItems:'stretch',
     justifyContent: 'space-between',
     paddingTop: 40,
     paddingLeft: 20,
@@ -471,8 +509,8 @@ const styles = StyleSheet.create({
     paddingBottom: 50
   },
   itemStyle: {
-    paddingTop: 20,
     height:32,
+    justifyContent: 'center',
     backgroundColor:'rgba(255,255,255,0.0)',
     alignItems: 'center'
   },
@@ -486,4 +524,22 @@ const styles = StyleSheet.create({
     bottom: 50,
     width: width,
   },
+  dots: {
+    width: width,
+    height: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    marginLeft: 4,
+    marginRight: 5,
+    borderRadius: 4,
+    backgroundColor: 'hsla(0,0%,100%,.8)',
+  },
+  active: {
+    width: 20,
+  }
 })
