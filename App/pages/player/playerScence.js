@@ -404,8 +404,8 @@ export default class Play extends Component {
             /> }
             <View style={styles.bottom}>
               <View style={styles.dots}>
-                <View style={[styles.dot, {width: this.state.currentShow === 'cd' ? 20 : 8}]} />
-                <View style={[styles.dot, {width: this.state.currentShow === 'lyric' ? 20 : 8}]} />
+                <View style={[styles.dot, this.state.currentShow === 'cd' && styles.active ]} />
+                <View style={[styles.dot, this.state.currentShow === 'lyric' && styles.active ]} />
               </View>
               {/*进度条*/}
               <View style={styles.progress}>
