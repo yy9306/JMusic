@@ -199,6 +199,30 @@ export default class Play extends Component {
     }
   }
 
+  //播放模式 接收传过来的当前播放模式 this.state.playModel
+  playModel = (playModel) =>{
+    playModel++;
+    playModel = playModel === 4 ? 1 : playModel
+    //重新设置
+    this.setState({
+      playModel:playModel
+    })
+    //根据设置后的模式重新设置背景图片
+    if(playModel === 1){
+      this.setState({
+        btnModel:require('../img/icon_mode.png'),
+      })
+    }else if(playModel ===  2){
+      this.setState({
+        btnModel:require('../img/icon-random.png'),
+      })
+    }else{
+      this.setState({
+        btnModel:require('../img/icon_loop.png'),
+      })
+    }
+  }
+
   //把秒数转换为时间类型
   formatTime(time) {
     // 71s -> 01:11
@@ -298,7 +322,7 @@ export default class Play extends Component {
         } else {
           itemAry.push(
             <View key={i} style={styles.itemStyle}>
-              <Text style={{ color: 'white', fontSize: 14 }}> {item} </Text>
+              <Text style={{ color: 'white', fontSize: 16 }}> {item} </Text>
             </View>
           );
         }
@@ -311,8 +335,25 @@ export default class Play extends Component {
         )
       }
     }
-
     return itemAry;
+  }
+
+  // 播放当前歌词
+
+  _renderCurrentText() {
+    // 数组
+    var itemAry = [];
+    for (var i = 0; i < lyrObj.length; i++) {
+      var item = lyrObj[i].txt
+      if (lyrObj[i+1] && this.state.currentTime.toFixed(2) > lyrObj[i].total && this.state.currentTime.toFixed(2) < lyrObj[i+1].total) {
+        itemAry.push(
+          <View key={i} style={styles.songWrapper}>
+            <Text style={styles.currentText} numberOfLines={1}>{item}</Text>
+          </View>
+        )
+      }
+    }
+    return itemAry
   }
 
   // 歌词唱片滚动
@@ -366,20 +407,23 @@ export default class Play extends Component {
                         onScroll={(e) => {
                           this._onScroll(e)
                         }}>
-              <View style={{width: width, flex: 1}}>
-                {/*胶片光盘*/}
-                <Image source={require('../img/胶片盘.png')} style={{width:260,height:260,alignSelf:'center'}}/>
+              <View style={styles.playWrapper}>
+                <View>
+                  {/*胶片光盘*/}
+                  <Image source={require('../img/胶片盘.png')} style={{width:260,height:260,alignSelf:'center'}}/>
 
-                {/*旋转小图*/}
-                <Animated.Image
-                  ref = 'myAnimate'
-                  style={{width:210,height:210,marginTop: -235,alignSelf:'center',borderRadius: 200*0.5,transform: [{rotate: this.state.imgRotate.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '360deg']
-                      })
-                    }]}}
-                  source={{uri: this.state.pic_small}}
-                />
+                  {/*旋转小图*/}
+                  <Animated.Image
+                    ref = 'myAnimate'
+                    style={{width:210,height:210,marginTop: -235,alignSelf:'center',borderRadius: 200*0.5,transform: [{rotate: this.state.imgRotate.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '360deg']
+                        })
+                      }]}}
+                    source={{uri: this.state.pic_small}}
+                  />
+                </View>
+                {this._renderCurrentText()}
               </View>
               <View style={{width: width, flex: 1, alignItems:'center', paddingBottom: 46}}>
                 <ScrollView style={{position:'relative'}}
@@ -518,6 +562,22 @@ const styles = StyleSheet.create({
     position:'absolute',
     top: 90,
     bottom: 170,
+  },
+  playWrapper: {
+    width: width,
+    flex: 1,
+  },
+  currentText: {
+    fontSize: 16,
+    width: width * 0.8,
+    textAlign: 'center',
+    color: 'hsla(0,0%,100%,.5)'
+  },
+  songWrapper: {
+    marginTop: 70,
+    width: width,
+    alignItems: 'center',
+
   },
   bottom: {
     position: 'absolute',
