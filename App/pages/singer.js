@@ -1,30 +1,28 @@
-import React, {Component} from 'react'
+import React, {Component} from "react";
 import {
   View,
   Text,
-  StyleSheet,
   Image,
-  StatusBar,
-  Dimensions,
   TouchableOpacity,
-  FlatList,
-  ScrollView
-} from 'react-native'
-
-import HttpMusic from '../api/api'
-import Header from './header'
-import NavBarView from '../base/NavBarView'
-import {width, height, jumpPager} from '../base/Utils'
-
+  StyleSheet,
+  Platform
+} from "react-native";
 
 const HOT_SINGER_LEN = 10
 const HOT_NAME = '热门'
 const TITLE_HEIGHT = 60
 const LIST_HEIGHT = 80
-export default class Singer extends Component{
-  static navigationOptions = {
-    header: null,
-  }
+import HttpMusic from '../api/api'
+import { LargeList } from "react-native-largelist";
+import singer from '../common/singer.js'
+import {width, height, jumpPager} from '../base/Utils'
+
+
+export default class SingerL extends Component {
+  selectedIndex: number = 0;
+  listRef: LargeList;
+  indexes: LargeList;
+
   constructor(props) {
     super(props)
     this.state = {
@@ -35,49 +33,23 @@ export default class Singer extends Component{
     this.HttpMusic = new HttpMusic()
     this.listHeight = []
     this.getSinger()
-    // this.singerList = require('../sources/json/singerList.json')
   }
 
-  componentWillMount() {
-    // setTimeout(() => {
-    //   this.singerItem.measure((x,y,widht,height,left,top) => {
-    //     console.log(x, y, width, height, left, top)
-    //   })
-    // })
-   setTimeout(() => {
-     this._normalizeSinger(this.state.singerData)
-   }, 100)
-    // this._normalizeSinger(this.state.singerData)
-  }
-  
   getSinger() {
-    this.HttpMusic.getSingerDetail()
+    this.HttpMusic.getSinger()
       .then((request) => {
         if(request.code === 0) {
-          this.setState({singerData: request.data.list}, )
+          this.setState({singerData: request.data.list}, () => {
+            this._normalizeSinger(this.state.singerData)
+          })
         }
       })
       .catch((error) => {
         console.log(error)
       })
   }
-  componentDidMount() {
-    setTimeout(() => {
-      this._calculateHeight.bind(this)()
-    }, 100)
-  }
-  // 计算高度
-  _calculateHeight() {
-    const list = this.state.Singerlist;
-    let height = 0;
-    this.listHeight.push(height)
-    for (let i = 0; i < list.length; i++) {
-      let item = list[i].height
-      height += item;
-      this.listHeight.push(height)
-    }
-  }
-  
+
+
   // 处理数据
   _normalizeSinger(list) {
     let map = {
@@ -88,11 +60,7 @@ export default class Singer extends Component{
     }
     list.forEach((item, index) => {
       if (index < HOT_SINGER_LEN) {
-        map.hot.items.push({
-          name: item.Fsinger_name,
-          id: item.Fsinger_mid,
-          avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${item.Fsinger_mid}.jpg?max_age=2592000`
-        })
+        map.hot.items.push(new singer({id: item.Fsinger_mid, name: item.Fsinger_name}))
       }
       const key = item.Findex
       if (!map[key]) {
@@ -101,11 +69,7 @@ export default class Singer extends Component{
           items: []
         }
       }
-      map[key].items.push({
-        name: item.Fsinger_name,
-        id: item.Fsinger_mid,
-        avatar: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${item.Fsinger_mid}.jpg?max_age=2592000`
-      })
+      map[key].items.push(new singer({id: item.Fsinger_mid, name: item.Fsinger_name}))
     })
     // 为了得到有序列表，我们需要处理 map
     let ret = []
@@ -122,163 +86,119 @@ export default class Singer extends Component{
     ret.sort((a, b) => {
       return a.title.charCodeAt(0) - b.title.charCodeAt(0)
     })
-    
+
     let  retList = hot.concat(ret)
-    // console.log(hot.concat(ret))
     for(let i = 0; i < retList.length; i++) {
       retList[i].height = retList[i].items.length * LIST_HEIGHT + TITLE_HEIGHT
     }
-    console.dir(retList)
+    retList[0].selected = true;
     this.setState({Singerlist: retList})
   }
-  
-  watchScroll(e) {
-    const listHeight = this.listHeight
-    let {contentOffset} = e.nativeEvent
-    let newY = contentOffset.y
-    if (newY < 0) {
-      this.setState({activeIndex: 0})
-      return
-    }
-
-    for (let i = 0; i < listHeight.length; i++) {
-      let height1 = listHeight[i]
-      let height2 = listHeight[i + 1]
-      if (newY >= height1 && newY < height2) {
-        this.setState({activeIndex: i})
-        return
-      }
-    }
-  }
-  
-  goToScreen(index) {
-    let offsetY = this.listHeight[index]
-    this.refs.scrollView.scrollToOffset({animated: false, offset: offsetY})
-  }
-  
-  // _onLayout(event) {
-  //   let {x, y, width, height} = event.nativeEvent.layout
-  //   console.log(y, height)
-  // }
-  
   render() {
     return (
-      <View style={styles.container}>
-        <View style={styles.singer}>
-          <FlatList ref="scrollView"
-                    data={this.state.Singerlist}
-                    keyExtractor={(item,index)=>index}
-                    renderItem={({item}) => {
-                      return (
-                          <View style={styles.singer_items} ref={(singerItem) => {this.singerItem = singerItem}} >
-                            <View style={styles.singer_titile} onLayout={this._onLayout}>
-                              <Text style={styles.text}>{item.title}</Text>
-                            </View>
-                            <View style={styles.list_group}>
-                              {item.items.map((item, index) => {
-                                return (
-                                  <TouchableOpacity key={index} onPress={() => {
-                                    let list = item
-                                    jumpPager(this.props.navigate, 'SingerDetail', {
-                                      title: list.name,
-                                      avatar: list.avatar
-                                    })
-                                  }}>
-                                    <View style={styles.singer_group}>
-                                      <Image style={styles.singer_avatar} source={{uri: item.avatar}}/>
-                                      <Text style={styles.singer_name}>{item.name}</Text>
-                                    </View>
-                                  </TouchableOpacity>
-                                )
-                              })}
-                            </View>
-                          </View>
-                      )
-                    }}
-                    onScroll={this.watchScroll.bind(this)}
-                    showsVerticalScrollIndicator={false}
-          />
-        </View>
-        <View style={styles.cube_list_view}>
-          {this.state.Singerlist.map((item, index) => {
-            let text = item.title.substr(0, 1)
-            return (
-              <TouchableOpacity key={index} onPress={this.goToScreen.bind(this, index)}>
-                <View style={styles.cube_nav}>
-                  <Text style={[styles.cube_nav_text, {color: index === this.state.activeIndex ?'#ffcd32': 'hsla(0,0%,100%,.5)'}]}>{text}</Text>
-                </View>
-              </TouchableOpacity>
-            )
-          })}
-        </View>
+      <View style={{flex: 1}}>
+        {this.state.Singerlist && this.state.Singerlist.length > 0 && <LargeList
+          ref={ref => (this.listRef = ref)}
+          style={{ flex: 1, backgroundColor: '#222' }}
+          numberOfSections={()=>this.state.Singerlist.length}
+          numberOfRowsInSection={section => this.state.Singerlist[section].items.length}
+          heightForSection={() => 36}
+          renderSection={this.renderSection.bind(this)}
+          heightForCell={() => 80}
+          renderCell={this.renderItem.bind(this)}
+          onSectionDidHangOnTop={this.onSectionChange.bind(this)}
+          renderItemSeparator={() => null}
+        />}
+
+        {this.state.Singerlist && this.state.Singerlist.length > 0 && <LargeList
+          style={{position: 'absolute',backgroundColor: 'transparent', right: 0, width: 44,}}
+          ref={ref => (this.indexes = ref)}
+          numberOfRowsInSection={() => this.state.Singerlist.length}
+          heightForCell={() => 18}
+          renderCell={this.renderIndexes.bind(this)}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          renderItemSeparator={() => null}
+        />}
       </View>
+    );
+  }
+
+  renderIndexes(section: number, row: number) {
+    let selected = this.state.Singerlist[row].selected;
+    return (
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          height: 30,
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+        onPress={() => {
+          this.listRef.scrollToIndexPath({ section: row, row: 0 });
+        }}
+      >
+        <Text style={{ fontSize: 12, color: selected ? "#ffcd32" : "hsla(0,0%,100%,.5)" }}>
+          {this.state.Singerlist[row].title.substr(0, 1)}
+        </Text>
+      </TouchableOpacity>
     )
   }
-}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#222222'
-  },
-  singer: {
-    width: width,
-    flex: 1,
-  },
-  singer_items: {
-    flex: 1,
-    width: width,
-    paddingBottom: 30,
-  },
-  singer_titile: {
-    height: 30,
-    width: width,
-    justifyContent: 'center',
-    backgroundColor: '#333',
-    paddingLeft: 20,
-  },
-  text: {
-    fontSize: 14,
-    color: 'hsla(0,0%,100%,.5)'
-  },
-  list_group: {
-    flex: 1,
-    width: width,
-  },
-  singer_group: {
-    width: width,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingLeft: 20,
-    paddingTop: 30,
-  },
-  singer_avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
-  singer_name: {
-    fontSize: 14,
-    color: 'hsla(0,0%,100%,.5)',
-    marginLeft: 20,
-  },
-  cube_list_view: {
-    position: 'absolute',
-    zIndex: 10,
-    right: 0,
-    height: height-150,
-    justifyContent: 'center',
-    width: 44,
-  },
-  cube_nav: {
-    width: 44,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent'
-  },
-  cube_nav_text: {
-    fontSize: 14,
-    color: 'hsla(0,0%,100%,.5)',
+  renderSection(section: number) {
+    return (
+      <View
+        style={{ flex: 1,backgroundColor: "#333", justifyContent: "center" }}
+      >
+        <Text style={{ marginLeft: 20, fontSize: 14, color: 'hsla(0,0%,100%,.5)' }}>
+          {this.state.Singerlist[section].title}
+        </Text>
+      </View>
+    );
   }
-})
+
+  renderItem(section: number, row: number) {
+    let singer = this.state.Singerlist[section].items[row];
+    return (
+      <TouchableOpacity style={{flex: 1}}
+                        onPress={() => {
+                          jumpPager(this.props.navigate, 'SingerDetail', {
+                            title: singer.name,
+                            avatar: singer.avatar,
+                            id: singer.id
+                          })
+                        }}
+      >
+        <View style={{flex: 1, paddingLeft: 20, flexDirection: 'row', alignItems: 'center'}}>
+          <Image style={{width: 50, height: 50, borderRadius: 25, marginRight: 20}} source={{uri: singer.avatar}}/>
+          <Text style={{color: 'hsla(0,0%,100%,.5)'}}>
+            {singer.name}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  onSectionChange(section:number){
+    this.state.Singerlist[this.selectedIndex].selected = false;
+    this.state.Singerlist[section].selected = true;
+    // 使用局部更新
+    this.indexes.reloadIndexPaths([
+      { section: 0, row: this.selectedIndex },
+      { section: 0, row: section }
+    ]);
+    this.selectedIndex = section;
+    // 使用更新所有数据源
+    // this.indexes.reloadData();
+
+    let bFind = false;
+    this.indexes.visibleIndexPaths().forEach(indexPath=>{
+      if (indexPath.row===section) {
+        bFind = true;
+      }
+    });
+    if (!bFind) {
+      this.indexes.scrollToIndexPath({section:0,row:section});
+    }
+  }
+}

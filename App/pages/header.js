@@ -16,7 +16,6 @@ import NavBarView from '../base/NavBarView'
 import {jumpPager,width} from '../base/Utils'
 import Recommend from './recommend'
 import Singer from './singer'
-import SingerL from './singerL'
 import Rank from './rank'
 import Search from './search'
 
@@ -32,7 +31,7 @@ export default class Header extends Component{
     this.bgColor = '#222'
     this.tabJson = require('../sources/json/nav.json')
   }
-  
+
   render() {
     return (
       <View style={styles.container}>

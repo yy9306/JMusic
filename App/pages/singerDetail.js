@@ -23,7 +23,6 @@ export default class SingerDetail extends Component{
   static navigationOptions = {
     header: null,
   }
-
   constructor(props) {
     super(props)
     this.state = {
@@ -31,10 +30,11 @@ export default class SingerDetail extends Component{
       singerData: [],
     }
     this.HttpMusic = new HttpMusic()
-    this.title = this.props.navigation.state.params.data.name
-    this.avatar = this.props.navigation.state.params.data.avatar
-    this.mid = this.props.navigation.state.params.data.id
-    this.page = this.props.navigation.state.params.data.page
+    let {data} = this.props.navigation.state.params.data
+    this.title = data.name
+    this.avatar = data.avatar
+    this.mid = data.id
+    this.page = data.page
   }
 
   componentWillMount() {
@@ -93,7 +93,6 @@ export default class SingerDetail extends Component{
   }
 
   render() {
-    // let Avatar = this.avatar.replace(/(?=\:)/g, 's')
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={() => {this.props.navigation.goBack()}} style={styles.back}>
