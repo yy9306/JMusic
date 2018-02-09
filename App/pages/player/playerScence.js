@@ -69,8 +69,9 @@ export default class Play extends Component {
   }
 
   componentDidMount() {
+    let currentIndex = this.navigate.currentIndex ? this.navigate.currentIndex : 0;
     this.stop()
-    this.loadSongInfo(this.navigate.currentIndex)
+    this.loadSongInfo(currentIndex)
   }
   componentWillUpdate(nextProps, nextState) {
     var itemAry = [];

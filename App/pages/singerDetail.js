@@ -14,7 +14,7 @@ import {
 
 import HttpMusic from '../api/api'
 import {createSong, isValidMusic} from '../common/song'
-import {width,height, jumpPager} from '../base/Utils'
+import {width,height, jumpPager, shuffle} from '../base/Utils'
 
 const windowHeight = width * 0.7;
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -23,6 +23,7 @@ export default class SingerDetail extends Component{
   static navigationOptions = {
     header: null,
   }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -30,7 +31,8 @@ export default class SingerDetail extends Component{
       singerData: [],
     }
     this.HttpMusic = new HttpMusic()
-    let {data} = this.props.navigation.state.params.data
+    let {data} = this.props.navigation.state.params
+
     this.title = data.name
     this.avatar = data.avatar
     this.mid = data.id
@@ -77,7 +79,6 @@ export default class SingerDetail extends Component{
         ret.push(createSong(musicData))
       }
     })
-    console.log(ret)
     this.setState({singerData: ret})
   }
 
@@ -96,15 +97,12 @@ export default class SingerDetail extends Component{
     return (
       <View style={styles.container}>
         <TouchableOpacity onPress={() => {this.props.navigation.goBack()}} style={styles.back}>
-           <Image style={{width: 26, height: 26}}  source={require('./img/icon_back.png')}/>
+          <Image style={{width: 26, height: 26}}  source={require('./img/icon_back.png')}/>
         </TouchableOpacity>
         <View style={styles.titleWrapper}>
           <Text style={styles.title} numberOfLines={1}>{this.props.navigation.state.params.data.title}</Text>
         </View>
-        <Animated.Image style={{
-          resizeMode: 'cover',
-          width: width,
-          height: windowHeight,
+        {this.state.singerData.length > 0 && <Animated.View style={{position: 'relative', width: width, paddingTop: windowHeight,
           opacity: this.state.scrollY.interpolate({
             inputRange: [-windowHeight, 0, windowHeight / 1.2],
             outputRange: [1, 1, 0.4],
@@ -112,17 +110,34 @@ export default class SingerDetail extends Component{
           }),
           transform: [{
             translateY: this.state.scrollY.interpolate({
-              inputRange: [ -windowHeight, 0, windowHeight],
-              outputRange: [windowHeight/2, 0, -50],
+              inputRange: [-windowHeight, 0, windowHeight],
+              outputRange: [windowHeight / 2, 0, -50],
               extrapolate: 'clamp'
             })
-          },{
+          }, {
             scale: this.state.scrollY.interpolate({
-              inputRange: [ -windowHeight, 0, windowHeight],
+              inputRange: [-windowHeight, 0, windowHeight],
               outputRange: [2, 1, 1]
             })
           }]
+        }}>
+          <Image style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            resizeMode: 'cover',
+            width: width,
+            height: windowHeight,
         }}  source={{uri: this.avatar}}/>
+          <TouchableOpacity style={styles.playWrapper} onPress={() => {
+            jumpPager(this.props.navigation.navigate, 'Play',{
+              songs: shuffle(this.state.singerData)
+            })
+          }}>
+            <Image source={require('./img/icon-play.png')} style={styles.iconPlay}/>
+          </TouchableOpacity>
+          <View style={styles.filter} />
+        </Animated.View>}
         <Animated.View style={{
           flex: 1,
           position: 'absolute',
@@ -145,29 +160,29 @@ export default class SingerDetail extends Component{
           }]
         }} ref="list_wrapper">
           {this.state.singerData.length > 0 && <AnimatedFlatList
-                    data={this.state.singerData}
-                    keyExtractor={(item, index) => index}
-                    showsVerticalScrollIndicator={false}
-                    scrollEventThrottle={26}
-                    onScroll={Animated.event(
-                      [{ nativeEvent: { contentOffset: { y: this.state.scrollY }}}],
-                      { useNativeDriver: true }
-                    )}
-                    renderItem={({item, index}) => {
-                      return (
-                        <TouchableOpacity onPress={() => {
-                          jumpPager(this.props.navigation.navigate, 'PlayerScence', {
-                            songs: this.state.singerData,
-                            currentIndex: index
-                          })
-                        }}>
-                          <View style={styles.listGroup}>
-                            <Text numberOfLines={1} style={styles.singer_name}>{item.name}</Text>
-                            <Text numberOfLines={1} style={styles.singer_album}>{item.singer}-{item.album}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    }}/>}
+            data={this.state.singerData}
+            keyExtractor={(item, index) => index}
+            showsVerticalScrollIndicator={false}
+            scrollEventThrottle={26}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: this.state.scrollY }}}],
+              { useNativeDriver: true }
+            )}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity onPress={() => {
+                  jumpPager(this.props.navigation.navigate, 'Play', {
+                    songs: this.state.singerData,
+                    currentIndex: index
+                  })
+                }}>
+                  <View style={styles.listGroup}>
+                    <Text numberOfLines={1} style={styles.singer_name}>{item.name}</Text>
+                    <Text numberOfLines={1} style={styles.singer_album}>{item.singer}-{item.album}</Text>
+                  </View>
+                </TouchableOpacity>
+              )
+            }}/>}
         </Animated.View>
       </View>
     )
@@ -197,6 +212,28 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     color: '#fff',
+  },
+  playWrapper: {
+    position: 'absolute',
+    bottom: 70,
+    left: 0,
+    width: width,
+    height: 32,
+    zIndex: 10,
+    alignItems: 'center'
+  },
+  iconPlay: {
+    height: 32,
+    width: 135,
+  },
+  filter: {
+    flex: 1,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: width,
+    height: windowHeight,
+    backgroundColor: 'rgba(7, 17, 27, 0.4)'
   },
   back: {
     position: 'absolute',

@@ -11,17 +11,18 @@ import {
   ScrollView, Animated
 } from 'react-native'
 
+import HttpMusic from '../api/api'
+import {createSong} from '../common/song'
+import {height, jumpPager, width, shuffle} from '../base/Utils'
+
 const windowHeight = width * 0.7;
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
-import HttpMusic from '../api/api'
-import {createSong} from '../common/song'
-import {height, jumpPager, width} from '../base/Utils'
 
 export default class RankDetail extends Component{
   constructor(props) {
     super(props)
-    
+
     this.state = {
       scrollY: new Animated.Value(0),
       rankList: []
@@ -30,7 +31,7 @@ export default class RankDetail extends Component{
     this.dataId = this.props.navigation.state.params.data.id
     this.requestData(this.dataId)
   }
-  
+
   requestData(id) {
     this.HttpMusic.getRankDetail(id)
       .then((request) => {
@@ -39,10 +40,10 @@ export default class RankDetail extends Component{
           this.setState({rankList: this._normalizeSongs(request.songlist)})
         }
       }).catch((error) => {
-        console.log(error)
+      console.log(error)
     })
   }
-  
+
   _normalizeSongs(list) {
     let ret = []
     list.forEach((item) => {
@@ -51,7 +52,7 @@ export default class RankDetail extends Component{
     })
     return ret.slice(0, 99)
   }
-  
+
   _renderNumber(index) {
     switch (index) {
       case 0:
@@ -74,7 +75,7 @@ export default class RankDetail extends Component{
         )
     }
   }
-  
+
   render() {
     return (
       <View style={styles.container}>
@@ -84,10 +85,7 @@ export default class RankDetail extends Component{
         <View style={styles.titleWrapper}>
           <Text style={styles.title}>{this.title}</Text>
         </View>
-        {this.state.rankList.length > 0 && <Animated.Image style={{
-          resizeMode: 'cover',
-          width: width,
-          height: windowHeight,
+        {this.state.rankList.length > 0 && <Animated.View style={{position: 'relative', width: width, paddingTop: windowHeight,
           opacity: this.state.scrollY.interpolate({
             inputRange: [-windowHeight, 0, windowHeight / 1.2],
             outputRange: [1, 1, 0.4],
@@ -95,17 +93,34 @@ export default class RankDetail extends Component{
           }),
           transform: [{
             translateY: this.state.scrollY.interpolate({
-              inputRange: [ -windowHeight, 0, windowHeight],
-              outputRange: [windowHeight/2, 0, -50],
+              inputRange: [-windowHeight, 0, windowHeight],
+              outputRange: [windowHeight / 2, 0, -50],
               extrapolate: 'clamp'
             })
-          },{
+          }, {
             scale: this.state.scrollY.interpolate({
-              inputRange: [ -windowHeight, 0, windowHeight],
+              inputRange: [-windowHeight, 0, windowHeight],
               outputRange: [2, 1, 1]
             })
           }]
-        }}  source={{uri: this.state.rankList[0].image}}/> }
+        }}>
+          <Image style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            resizeMode: 'cover',
+            width: width,
+            height: windowHeight,
+          }} source={{uri: this.state.rankList[0].image}}/>
+          <TouchableOpacity style={styles.playWrapper} onPress={() => {
+            jumpPager(this.props.navigation.navigate, 'Play',{
+              songs: shuffle(this.state.rankList)
+            })
+          }}>
+            <Image source={require('./img/icon-play.png')} style={styles.iconPlay}/>
+          </TouchableOpacity>
+          <View style={styles.filter} />
+        </Animated.View>}
         <Animated.View style={{
           flex: 1,
           position: 'absolute',
@@ -139,7 +154,7 @@ export default class RankDetail extends Component{
             renderItem={({item, index}) => {
               return (
                 <TouchableOpacity onPress={() => {
-                  jumpPager(this.props.navigation.navigate, 'PlayerScence', {
+                  jumpPager(this.props.navigation.navigate, 'Play', {
                     songs: this.state.rankList,
                     currentIndex: index
                   })
@@ -186,6 +201,28 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     color: '#fff',
+  },
+  playWrapper: {
+    position: 'absolute',
+    bottom: 70,
+    left: 0,
+    width: width,
+    height: 32,
+    zIndex: 10,
+    alignItems: 'center'
+  },
+  iconPlay: {
+    height: 32,
+    width: 135,
+  },
+  filter: {
+    flex: 1,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: width,
+    height: windowHeight,
+    backgroundColor: 'rgba(7, 17, 27, 0.4)'
   },
   listGroup: {
     height:64,
