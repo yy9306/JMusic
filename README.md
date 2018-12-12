@@ -3,7 +3,7 @@
 
 最近学习了react-native的一些知识，想做一个个人项目， 发现没有好的素材下手，想起之前学习过黄轶老师炸鸡音乐的课程，于是就想用react-native实现一遍，黄轶老师的这门课含金量还是很高的， 如果认真学习下来，是可以提高一个层次
 
- >  进阶链接 [https://coding.imooc.com/class/107.html](https://coding.imooc.com/class/107.html)
+ 
 
 ## 效果图
 
